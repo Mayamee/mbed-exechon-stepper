@@ -33,12 +33,11 @@ void split(std::string const &str, const char delim,
 }
 
 const float K_SVP = 22.85;
-const float K_Q_Virtual = 0.7;
+const float K_Q_Virtual = 0.745;
 const int SVP_1_3_start = 220;
-const int SVP_2_start = 250;
-//pay attention
-// SVP_1_3_start = 314
-// SVP_2_start = 250
+const int SVP_2_start = 250 + 105;
+// SVP_1_3_start = 295
+// SVP_2_start = 355
 void init()
 {
     MQ1.setSpeed(900);
@@ -48,7 +47,7 @@ void init()
     MQ5.setSpeed(900);
 // def 1200
     MQ1.setAcceleration(300);
-    MQ2.setAcceleration(7000);
+    MQ2.setAcceleration(300);
     MQ3.setAcceleration(300);
     MQ4.setAcceleration(600);
     MQ5.setAcceleration(600);
@@ -85,7 +84,6 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M3.goesTo(A3);
     M4.goesTo(A4);
     M5.goesTo(A5);
-    // while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped());
     while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped()&&!M5.stopped());
 }
 
@@ -113,22 +111,14 @@ int main()
                 data = "";
                 continue;
             };
-            // for(size_t i=0; i<q_arr.size();i++)
-            // {
-            //     printf(q_arr[i].c_str());
-            // }
             q1 = static_cast<int>(K_Q_Virtual * stof(q_arr[0]));
             q2 = static_cast<int>(stof(q_arr[1]));
             q3 = static_cast<int>(K_Q_Virtual * stof(q_arr[2]));
-            q4 = static_cast<int>(stof(q_arr[3]));
+            q4 = static_cast<int>(stof(q_arr[3]) - 90);
             q5 = static_cast<int>(stof(q_arr[4]));
-            moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, K_SVP * (q1 - SVP_1_3_start), K_SVP * (q2 - SVP_2_start), K_SVP * (q3 - SVP_1_3_start), q4, q5);
-            // moveMotor(MQ5, q5);
-            ThisThread::sleep_for(500);
 
-            // movePairs(MQ2,MQ4, K_SVP * (q2 - SVP_2_start), q4);
-            // movePairs(MQ1, MQ3, K_SVP * (q1 - SVP_1_3_start), K_SVP * (q3 - SVP_1_3_start));
-            // moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
+            moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, K_SVP * (q1 - SVP_1_3_start), K_SVP * (q2 - SVP_2_start), K_SVP * (q3 - SVP_1_3_start), q4, q5);
+            ThisThread::sleep_for(500);
             data = "";
             q_arr.clear();
             pc.printf("Done\n");
