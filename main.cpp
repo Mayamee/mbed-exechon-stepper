@@ -36,6 +36,8 @@ const float K_SVP = 22.85;
 const float K_Q_Virtual = 0.745;
 const int SVP_1_3_start = 220;
 const int SVP_2_start = 250 + 105;
+const float pi = 3.1416;
+//pay attention
 // SVP_1_3_start = 295
 // SVP_2_start = 355
 void init()
@@ -77,13 +79,13 @@ void movePairs(Stepper &M1, Stepper &M2, int A1, int A2)
     M2.goesTo(A2);
     while(!M1.stopped()&&!M2.stopped());
 }
-void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, int A1, int A2, int A3, int A4, int A5)
+void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, float A1, float A2, float A3, float A4, float A5)
 {
-    M1.goesTo(A1);
-    M2.goesTo(A2);
-    M3.goesTo(A3);
-    M4.goesTo(A4);
-    M5.goesTo(A5);
+    M1.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A1 - SVP_1_3_start)));
+    M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
+    M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
+    M4.goesTo(static_cast<int>(A4));
+    M5.goesTo(static_cast<int>(A5));
     while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped()&&!M5.stopped());
 }
 
@@ -96,8 +98,7 @@ int main()
     char charBuffer[2000];
     const char SEPARATOR = ',';
     vector<string> q_arr;
-    const float pi = 3.1416;
-    int q1,q2,q3,q4,q5;
+    float q1,q2,q3,q4,q5;
     while (true) 
     {
         string data = pc.gets(charBuffer, 2000);
@@ -111,14 +112,12 @@ int main()
                 data = "";
                 continue;
             };
-            q1 = static_cast<int>(K_Q_Virtual * stof(q_arr[0]));
-            q2 = static_cast<int>(stof(q_arr[1]));
-            q3 = static_cast<int>(K_Q_Virtual * stof(q_arr[2]));
-            q4 = static_cast<int>(stof(q_arr[3]) - 90);
-            q5 = static_cast<int>(stof(q_arr[4]));
-
-            moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, K_SVP * (q1 - SVP_1_3_start), K_SVP * (q2 - SVP_2_start), K_SVP * (q3 - SVP_1_3_start), q4, q5);
-            ThisThread::sleep_for(500);
+            q1 = stof(q_arr[0]);
+            q2 = stof(q_arr[1]);
+            q3 = stof(q_arr[2]);
+            q4 = stof(q_arr[3]);
+            q5 = stof(q_arr[4]);
+            moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
             data = "";
             q_arr.clear();
             pc.printf("Done\n");
