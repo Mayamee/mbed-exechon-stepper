@@ -52,11 +52,11 @@ const float pi = 3.1416;
 // SVP_2_start = 355
 void init()
 {
-    MQ1.setSpeed(900);
+    MQ1.setSpeed(65.61);
     MQ2.setSpeed(900);
-    MQ3.setSpeed(900);
-    MQ4.setSpeed(900);
-    MQ5.setSpeed(900);
+    MQ3.setSpeed(65.61);
+    MQ4.setSpeed(6.36);
+    MQ5.setSpeed(9.55);
 // def 1200
     MQ1.setAcceleration(300);
     MQ2.setAcceleration(300);
@@ -97,23 +97,20 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
     M4.goesTo(static_cast<int>(K_Q4 * A4));
     M5.goesTo(static_cast<int>(-A5));
-    // ThisThread::sleep_for(500);
-do
-{
-	do
-	{
-		do
-		{
-			do
-			{
-				do
-				{
+    do
+    {
+    	do
+    	{
+    		do
+    		{
+    			do
+    			{
+    				do{} while (!MQ5.stopped());
+    			} while (!MQ4.stopped());
+    		} while (!MQ3.stopped());
+    	} while (!MQ2.stopped());
+    } while (!MQ1.stopped());
 
-				} while (!MQ5.stopped());
-			} while (!MQ4.stopped());
-		} while (!MQ3.stopped());
-	} while (!MQ2.stopped());
-} while (!MQ1.stopped());
     MQTimer.stop();
     pc.printf("done\n");
 }
@@ -136,10 +133,14 @@ int main()
         string data = pc.gets(charBuffer, 2000);
         if(data.length() > 0)
         {
-            // if(data.find("/set_pos") != string::npos)
-            // {
-
-            // }
+            if(isModeSetPos)
+            {
+                
+            }
+            if(data.find("/set_pos") != string::npos)
+            {
+                isModeSetPos = true;
+            }
             if(data.find("/move_home") != string::npos)
             {
                 moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, 295, 355, 295, 0, 0);
