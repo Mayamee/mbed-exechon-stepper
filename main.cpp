@@ -96,7 +96,7 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
     M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
     M4.goesTo(static_cast<int>(K_Q4 * A4));
-    M5.goesTo(static_cast<int>(A5));
+    M5.goesTo(static_cast<int>(-A5));
     // ThisThread::sleep_for(500);
     while (!MQ1.stopped())
         while(!MQ2.stopped())
@@ -166,7 +166,7 @@ int main()
             q4 = stof(q_arr[3]);
             q5 = stof(q_arr[4]);
             moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
-            pc.printf("WTF?!\n");
+            pc.printf("worked\n");
         }
 
     }
