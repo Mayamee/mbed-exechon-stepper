@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
-DigitalOut EnablePIN(D2);
 Serial pc(USBTX,USBRX);
+
+DigitalOut EnablePIN(D2);
 Stepper MQ1(D6,D5);
 Stepper MQ2(D4,D3);
 Stepper MQ3(D8,D7);
@@ -34,6 +35,7 @@ void split(std::string const &str, const char delim,
 
 const float K_SVP = 22.85;
 const float K_Q_Virtual = 0.745;
+const float K_Q4 = 0.57;
 const int SVP_1_3_start = 220;
 const int SVP_2_start = 250 + 105;
 const float pi = 3.1416;
@@ -84,9 +86,10 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M1.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A1 - SVP_1_3_start)));
     M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
     M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
-    M4.goesTo(static_cast<int>(A4));
+    M4.goesTo(static_cast<int>(K_Q4 * A4));
     M5.goesTo(static_cast<int>(A5));
     while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped()&&!M5.stopped());
+    pc.printf("Done\n");
 }
 
 int main()
@@ -94,22 +97,31 @@ int main()
     EnablePIN.write(0);
     init();
     pc.baud(9200);
-    pc.printf("Serial Port Started\n");
+    pc.printf("Манипулятор запущен\n");
     char charBuffer[2000];
     const char SEPARATOR = ',';
+    const char CMD_SEPARATOR = ' ';
     vector<string> q_arr;
+    vector<string> cmd;
     float q1,q2,q3,q4,q5;
     while (true) 
     {
         string data = pc.gets(charBuffer, 2000);
         if(data.length() > 0)
         {
+            if(data.find("/correct") != string::npos)
+            {
+                MQ4.goesTo(-52);
+                while(!MQ4.stopped());
+                MQ4.setPositionZero();
+                pc.printf("Положение скорректированно\n");
+                continue;
+            }
             split(data, SEPARATOR, q_arr);
             if(q_arr.size() != 5) 
             {
                 q_arr.clear();
-                pc.printf("Error\n");
-                data = "";
+                pc.printf("Недостаточно данных\n");
                 continue;
             };
             q1 = stof(q_arr[0]);
@@ -118,9 +130,7 @@ int main()
             q4 = stof(q_arr[3]);
             q5 = stof(q_arr[4]);
             moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
-            data = "";
             q_arr.clear();
-            pc.printf("Done\n");
         }
 
     }
