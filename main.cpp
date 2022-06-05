@@ -36,7 +36,8 @@ const float K_SVP = 22.85;
 const float K_Q_Virtual = 0.745;
 const int SVP_1_3_start = 220;
 const int SVP_2_start = 250 + 105;
-// SVP_1_3_start = 295
+//pay attention
+// SVP_1_3_start = 314
 // SVP_2_start = 355
 void init()
 {
@@ -114,11 +115,9 @@ int main()
             q1 = static_cast<int>(K_Q_Virtual * stof(q_arr[0]));
             q2 = static_cast<int>(stof(q_arr[1]));
             q3 = static_cast<int>(K_Q_Virtual * stof(q_arr[2]));
-            q4 = static_cast<int>(stof(q_arr[3]) - 90);
+            q4 = static_cast<int>(stof(q_arr[3]));
             q5 = static_cast<int>(stof(q_arr[4]));
-
             moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, K_SVP * (q1 - SVP_1_3_start), K_SVP * (q2 - SVP_2_start), K_SVP * (q3 - SVP_1_3_start), q4, q5);
-            ThisThread::sleep_for(500);
             data = "";
             q_arr.clear();
             pc.printf("Done\n");
