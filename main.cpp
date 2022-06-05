@@ -34,6 +34,13 @@ void split(std::string const &str, const char delim,
 	}
 }
 
+//**************Semaphores**************//
+bool isModeSetPos = false; // Position configuration
+bool isModeSetVel = false; // Velosity configuration
+bool isModeSetAcc = false; // Acceleration configuration
+bool isModeSetDec = false; // Deceleration configuration
+//**************Semaphores**************//
+
 const float K_SVP = 22.85;
 const float K_Q_Virtual = 0.745;
 const float K_Q4 = 0.57;
