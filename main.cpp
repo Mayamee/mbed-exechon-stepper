@@ -6,6 +6,7 @@
 #include <vector>
 
 Serial pc(USBTX,USBRX);
+Timer MQTimer;
 
 DigitalOut EnablePIN(D2);
 Stepper MQ1(D6,D5);
@@ -83,12 +84,14 @@ void movePairs(Stepper &M1, Stepper &M2, int A1, int A2)
 }
 void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, float A1, float A2, float A3, float A4, float A5)
 {
+    MQTimer.start();
     M1.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A1 - SVP_1_3_start)));
     M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
     M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
     M4.goesTo(static_cast<int>(K_Q4 * A4));
     M5.goesTo(static_cast<int>(A5));
     while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped()&&!M5.stopped());
+    MQTimer.stop();
     pc.printf("Done\n");
 }
 
@@ -97,7 +100,7 @@ int main()
     EnablePIN.write(0);
     init();
     pc.baud(9200);
-    pc.printf("Манипулятор запущен\n");
+    pc.printf("Machine started\n");
     char charBuffer[2000];
     const char SEPARATOR = ',';
     const char CMD_SEPARATOR = ' ';
@@ -114,14 +117,25 @@ int main()
                 MQ4.goesTo(-52);
                 while(!MQ4.stopped());
                 MQ4.setPositionZero();
-                pc.printf("Положение скорректированно\n");
+                pc.printf("corrected\n");
+                continue;
+            }
+            if(data.find("/get_time") != string::npos)
+            {
+                pc.printf((to_string(MQTimer.read()) + '\n').c_str());
+                continue;
+            }
+            if(data.find("/reset_timer") != string::npos)
+            {
+                MQTimer.reset();
+                pc.printf("timer reset\n");
                 continue;
             }
             split(data, SEPARATOR, q_arr);
             if(q_arr.size() != 5) 
             {
                 q_arr.clear();
-                pc.printf("Недостаточно данных\n");
+                pc.printf("Not enough data\n");
                 continue;
             };
             q1 = stof(q_arr[0]);
