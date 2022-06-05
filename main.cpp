@@ -98,11 +98,22 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M4.goesTo(static_cast<int>(K_Q4 * A4));
     M5.goesTo(static_cast<int>(-A5));
     // ThisThread::sleep_for(500);
-    while (!MQ1.stopped())
-        while(!MQ2.stopped())
-            while(!MQ3.stopped())
-                while(!MQ4.stopped())
-                    while(!MQ5.stopped());
+do
+{
+	do
+	{
+		do
+		{
+			do
+			{
+				do
+				{
+
+				} while (!MQ5.stopped());
+			} while (!MQ4.stopped());
+		} while (!MQ3.stopped());
+	} while (!MQ2.stopped());
+} while (!MQ1.stopped());
     MQTimer.stop();
     pc.printf("done\n");
 }
