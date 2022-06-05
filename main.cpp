@@ -36,9 +36,9 @@ void split(std::string const &str, const char delim,
 
 //**************Semaphores**************//
 bool isModeSetPos = false; // Position configuration
-bool isModeSetVel = false; // Velosity configuration
-bool isModeSetAcc = false; // Acceleration configuration
-bool isModeSetDec = false; // Deceleration configuration
+bool isModeSetVel = false;		// Velosity configuration
+bool isModeSetAcc = false;		// Acceleration configuration
+bool isModeSetDec = false;		// Deceleration configuration
 //**************Semaphores**************//
 
 const float K_SVP = 22.85;
@@ -46,37 +46,9 @@ const float K_Q_Virtual = 0.745;
 const float K_Q4 = 0.57;
 const int SVP_1_3_start = 220;
 const int SVP_2_start = 250 + 105;
-const float pi = 3.1416;
 // pay attention
 //  SVP_1_3_start = 295
 //  SVP_2_start = 355
-void init()
-{
-	MQ1.setSpeed(65.61);
-	MQ2.setSpeed(900);
-	MQ3.setSpeed(65.61);
-	MQ4.setSpeed(6.36);
-	MQ5.setSpeed(9.55);
-	// def 1200
-	MQ1.setAcceleration(300);
-	MQ2.setAcceleration(300);
-	MQ3.setAcceleration(300);
-	MQ4.setAcceleration(600);
-	MQ5.setAcceleration(600);
-	// def 4000
-	MQ1.setDeceleration(7000);
-	MQ2.setDeceleration(7000);
-	MQ3.setDeceleration(7000);
-	MQ4.setDeceleration(1500);
-	MQ5.setDeceleration(1500);
-
-	MQ1.setPositionZero();
-	MQ2.setPositionZero();
-	MQ3.setPositionZero();
-	MQ4.setPositionZero();
-	MQ5.setPositionZero();
-}
-
 void moveMotor(Stepper &M, int angle)
 {
 	M.goesTo(angle);
@@ -93,6 +65,7 @@ void movePairs(Stepper &M1, Stepper &M2, int A1, int A2)
 }
 void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3, Stepper &M4, Stepper &M5, float A1, float A2, float A3, float A4, float A5)
 {
+	MQTimer.reset();
 	MQTimer.start();
 	M1.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A1 - SVP_1_3_start)));
 	M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
@@ -116,28 +89,61 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3, Stepper &M4, Stepper &M5,
 	} while (!MQ1.stopped());
 
 	MQTimer.stop();
-	pc.printf("done\n");
+	pc.printf("position changed\n");
+}
+
+void basicInit()
+{
+	MQ1.setSpeed(65.6095);
+	MQ2.setSpeed(900);
+	MQ3.setSpeed(65.6095);
+	MQ4.setSpeed(6.36);
+	MQ5.setSpeed(9.55);
+	// def 1200
+	MQ1.setAcceleration(300);
+	MQ2.setAcceleration(300);
+	MQ3.setAcceleration(300);
+	MQ4.setAcceleration(600);
+	MQ5.setAcceleration(600);
+	// def 4000
+	MQ1.setDeceleration(7000);
+	MQ2.setDeceleration(7000);
+	MQ3.setDeceleration(7000);
+	MQ4.setDeceleration(1500);
+	MQ5.setDeceleration(1500);
+
+	MQ1.setPositionZero();
+	MQ2.setPositionZero();
+	MQ3.setPositionZero();
+	MQ4.setPositionZero();
+	MQ5.setPositionZero();
 }
 
 int main()
 {
 	EnablePIN.write(0);
-	init();
+	basicInit();
 	pc.baud(9200);
 	pc.printf("Machine started\n");
 	char charBuffer[2000];
 	const char SEPARATOR = ',';
-	const char CMD_SEPARATOR = ' ';
 	vector<string> q_arr;
+	vector<string> vel_arr;
+	vector<string> acc_arr;
+	vector<string> dec_arr;
 	float q1, q2, q3, q4, q5;
+    string data = "";
 	while (true)
 	{
 		q_arr.clear();
-		string data = pc.gets(charBuffer, 2000);
+		vel_arr.clear();
+		acc_arr.clear();
+		dec_arr.clear();
+		data = pc.gets(charBuffer, 2000);
 		if (data.length() > 0)
 		{
-            //************************SEMAPHORES************************//
-            if (isModeSetPos)
+			//************************SEMAPHORES************************//
+			if (isModeSetPos)
 			{
 				split(data, SEPARATOR, q_arr);
 				if (q_arr.size() != 5)
@@ -154,7 +160,58 @@ int main()
 				isModeSetPos = false;
 				continue;
 			}
-            //************************SEMAPHORES************************//
+			if (isModeSetVel)
+			{
+				split(data, SEPARATOR, vel_arr);
+				if (vel_arr.size() != 5)
+				{
+					pc.printf("Not enough data\n");
+					continue;
+				};
+				MQ1.setSpeed(stof(vel_arr[0]));
+				MQ2.setSpeed(stof(vel_arr[1]));
+				MQ3.setSpeed(stof(vel_arr[2]));
+				MQ4.setSpeed(stof(vel_arr[3]));
+				MQ5.setSpeed(stof(vel_arr[4]));
+				pc.printf("velocity set\n");
+				isModeSetVel = false;
+				continue;
+			}
+			if (isModeSetAcc)
+			{
+				split(data, SEPARATOR, acc_arr);
+				if (acc_arr.size() != 5)
+				{
+					pc.printf("Not enough data\n");
+					continue;
+				};
+				MQ1.setAcceleration(stof(acc_arr[0]));
+				MQ2.setAcceleration(stof(acc_arr[1]));
+				MQ3.setAcceleration(stof(acc_arr[2]));
+				MQ4.setAcceleration(stof(acc_arr[3]));
+				MQ5.setAcceleration(stof(acc_arr[4]));
+				pc.printf("acceleration set\n");
+				isModeSetAcc = false;
+				continue;
+			}
+			if (isModeSetDec)
+			{
+				split(data, SEPARATOR, dec_arr);
+				if (dec_arr.size() != 5)
+				{
+					pc.printf("Not enough data\n");
+					continue;
+				};
+				MQ1.setDeceleration(stof(dec_arr[0]));
+				MQ2.setDeceleration(stof(dec_arr[1]));
+				MQ3.setDeceleration(stof(dec_arr[2]));
+				MQ4.setDeceleration(stof(dec_arr[3]));
+				MQ5.setDeceleration(stof(dec_arr[4]));
+				pc.printf("deceleration set\n");
+				isModeSetDec = false;
+				continue;
+			}
+			//************************SEMAPHORES************************//
 			//************************CONFIGMODE************************//
 			if (data.find("/set_pos") != string::npos)
 			{
@@ -193,16 +250,24 @@ int main()
 				continue;
 			}
 			//************************CONFIGMODE************************//
-            //************************COMMANDS************************//
-            if(data.find("/move") != string::npos)
-            {
-    			moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
-                continue;
-            }
+			//************************COMMANDS************************//
+			// if(data.find("/get_state") != string::npos)
+			// {
+			//     pc.printf("%s", (to_string(static_cast<int>(((MQ1.getPosition() / K_Q_Virtual) + SVP_1_3_start) / K_SVP)) + ' ').c_str());
+			//     pc.printf("%s", (to_string(static_cast<int>((MQ2.getPosition() + SVP_2_start) / K_SVP)) + ' ').c_str());
+			//     pc.printf("%s", (to_string(static_cast<int>(((MQ3.getPosition() / K_Q_Virtual) + SVP_1_3_start) / K_SVP)) + ' ').c_str());
+			//     pc.printf("%s", (to_string(static_cast<int>(MQ4.getPosition() / K_Q4)) + ' ').c_str());
+			//     pc.printf("%s", (to_string(static_cast<int>(-MQ5.getPosition())) + '\n').c_str());
+			//     continue;
+			// }
+			if (data.find("/move") != string::npos)
+			{
+				moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
+				continue;
+			}
 			if (data.find("/get_home") != string::npos)
 			{
-                pc.printf("test");
-				moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, static_cast<float>(295), static_cast<float>(355), static_cast<float>(295), static_cast<float>(0), static_cast<float>(0));
+				moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, 295, 355, 295, 0, 0);
 				pc.printf("home position\n");
 				continue;
 			}
@@ -226,7 +291,8 @@ int main()
 				pc.printf("timer reset\n");
 				continue;
 			}
-            //************************COMMANDS************************//
+			//************************COMMANDS************************//
+            data = "";
 		}
 	}
 }
