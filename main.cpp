@@ -97,9 +97,14 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3,Stepper &M4, Stepper &M5, 
     M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
     M4.goesTo(static_cast<int>(K_Q4 * A4));
     M5.goesTo(static_cast<int>(A5));
-    while(!M1.stopped()&&!M2.stopped()&&!M3.stopped()&&!M4.stopped()&&!M5.stopped());
+    // ThisThread::sleep_for(500);
+    while (!MQ1.stopped())
+        while(!MQ2.stopped())
+            while(!MQ3.stopped())
+                while(!MQ4.stopped())
+                    while(!MQ5.stopped());
     MQTimer.stop();
-    pc.printf("Done\n");
+    pc.printf("done\n");
 }
 
 int main()
@@ -116,9 +121,20 @@ int main()
     float q1,q2,q3,q4,q5;
     while (true) 
     {
+        q_arr.clear();
         string data = pc.gets(charBuffer, 2000);
         if(data.length() > 0)
         {
+            // if(data.find("/set_pos") != string::npos)
+            // {
+
+            // }
+            if(data.find("/move_home") != string::npos)
+            {
+                moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, 295, 355, 295, 0, 0);
+                pc.printf("home position\n");
+                continue;
+            }
             if(data.find("/correct") != string::npos)
             {
                 MQ4.goesTo(-52);
@@ -127,9 +143,9 @@ int main()
                 pc.printf("corrected\n");
                 continue;
             }
-            if(data.find("/get_time") != string::npos)
+            if(data.find("/get_timer") != string::npos)
             {
-                pc.printf((to_string(MQTimer.read()) + '\n').c_str());
+                pc.printf("%s", (to_string(MQTimer.read()) + '\n').c_str());
                 continue;
             }
             if(data.find("/reset_timer") != string::npos)
@@ -141,7 +157,6 @@ int main()
             split(data, SEPARATOR, q_arr);
             if(q_arr.size() != 5) 
             {
-                q_arr.clear();
                 pc.printf("Not enough data\n");
                 continue;
             };
@@ -151,7 +166,7 @@ int main()
             q4 = stof(q_arr[3]);
             q5 = stof(q_arr[4]);
             moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
-            q_arr.clear();
+            pc.printf("WTF?!\n");
         }
 
     }
