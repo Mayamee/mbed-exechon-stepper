@@ -121,7 +121,7 @@ void basicInit()
 
 int main()
 {
-	EnablePIN.write(0);
+	EnablePIN.write(1);
 	basicInit();
 	pc.baud(9200);
 	pc.printf("Machine started\n");
@@ -260,6 +260,12 @@ int main()
 			//     pc.printf("%s", (to_string(static_cast<int>(-MQ5.getPosition())) + '\n').c_str());
 			//     continue;
 			// }
+            if(data.find("/toggle_power") != string::npos)
+            {
+                EnablePIN = !EnablePIN;
+                (EnablePIN) ? pc.printf("Power off\n") : pc.printf("Power on\n");
+                continue;
+            }
 			if (data.find("/move") != string::npos)
 			{
 				moveMotors(MQ1, MQ2, MQ3, MQ4, MQ5, q1, q2, q3, q4, q5);
