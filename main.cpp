@@ -13,7 +13,10 @@ Stepper MQ1(D6, D5);
 Stepper MQ2(D4, D3);
 Stepper MQ3(D8, D7);
 Stepper MQ4(D10, D9);
-Stepper MQ5(D12, D11);
+Stepper MQ5(D12, D11); //half step
+
+
+
 
 // D6;D5 - q1 [clk dir]
 // D4;D3 - q2 [clk dir]
@@ -56,7 +59,7 @@ bool isModeSetVel = false;		// Velosity configuration
 bool isModeSetAcc = false;		// Acceleration configuration
 bool isModeSetDec = false;		// Deceleration configuration
 //**************Semaphores**************//
-
+const float K_Q5_half_step_vel = 2.845;
 const float K_SVP = 22.85;
 const float K_Q_Virtual = 0.745;
 const float K_Q4 = 0.57;
@@ -117,23 +120,23 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3, Stepper &M4, Stepper &M5,
 
 void basicInit()
 {
-	MQ1.setSpeed(65.6095);
+	MQ1.setSpeed(900);
 	MQ2.setSpeed(900);
-	MQ3.setSpeed(65.6095);
-	MQ4.setSpeed(6.36);
-	MQ5.setSpeed(9.55);
+	MQ3.setSpeed(900);
+	MQ4.setSpeed(1500);
+	MQ5.setSpeed(1500);
 	// def 1200
 	MQ1.setAcceleration(300);
 	MQ2.setAcceleration(300);
 	MQ3.setAcceleration(300);
-	MQ4.setAcceleration(600);
-	MQ5.setAcceleration(600);
+	MQ4.setAcceleration(1200);
+	MQ5.setAcceleration(1200);
 	// def 4000
-	MQ1.setDeceleration(7000);
-	MQ2.setDeceleration(7000);
-	MQ3.setDeceleration(7000);
-	MQ4.setDeceleration(1500);
-	MQ5.setDeceleration(1500);
+	MQ1.setDeceleration(8000);
+	MQ2.setDeceleration(8000);
+	MQ3.setDeceleration(8000);
+	MQ4.setDeceleration(8000);
+	MQ5.setDeceleration(8000);
     // rec 8000
 	MQ1.setPositionZero();
 	MQ2.setPositionZero();
@@ -178,7 +181,9 @@ int main()
 				q2 = stof(q_arr[1]);
 				q3 = stof(q_arr[2]);
 				q4 = stof(q_arr[3]);
-				q5 = stof(q_arr[4]);
+                // half step
+				q5 = 2 * stof(q_arr[4]);
+                // half step
 				pc.printf("position set\n");
 				isModeSetPos = false;
 				continue;
@@ -192,10 +197,10 @@ int main()
 					continue;
 				};
 				MQ1.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
-				MQ2.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
-				MQ3.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
-				MQ4.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
-				MQ5.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
+				MQ2.setSpeed(saturation(stof(vel_arr[1]), 0, 1200));
+				MQ3.setSpeed(saturation(stof(vel_arr[2]), 0, 1200));
+				MQ4.setSpeed(saturation(stof(vel_arr[3]), 0, 1200));
+				MQ5.setSpeed(K_Q5_half_step_vel * saturation(stof(vel_arr[4]), 0, 1200));
 				pc.printf("velocity set\n");
 				isModeSetVel = false;
 				continue;
@@ -212,7 +217,9 @@ int main()
 				MQ2.setAcceleration(stof(acc_arr[1]));
 				MQ3.setAcceleration(stof(acc_arr[2]));
 				MQ4.setAcceleration(stof(acc_arr[3]));
-				MQ5.setAcceleration(stof(acc_arr[4]));
+                // half step
+				MQ5.setAcceleration(2 * stof(acc_arr[4]));
+                // half step
 				pc.printf("acceleration set\n");
 				isModeSetAcc = false;
 				continue;
@@ -294,6 +301,15 @@ int main()
 			if (data.find("/correct") != string::npos)
 			{
 				MQ4.goesTo(-52);
+				while (!MQ4.stopped())
+					;
+				MQ4.setPositionZero();
+				pc.printf("corrected\n");
+				continue;
+			}
+            if (data.find("/uncorrect") != string::npos)
+			{
+				MQ4.goesTo(52);
 				while (!MQ4.stopped())
 					;
 				MQ4.setPositionZero();
