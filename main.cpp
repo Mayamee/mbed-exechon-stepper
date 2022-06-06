@@ -21,6 +21,22 @@ Stepper MQ5(D12, D11);
 // D10;D9 - q4 [clk dir]
 // D12;D11 - q5 [clk dir]
 
+float saturation(float value ,float min, float max)
+{
+    if(value > max)
+    {
+        return max;
+    } 
+    else if (value < min) 
+    {
+        return min;
+    }
+    else
+    {
+        return value;
+    }
+}
+
 void split(std::string const &str, const char delim,
 					 std::vector<std::string> &out)
 {
@@ -35,7 +51,7 @@ void split(std::string const &str, const char delim,
 }
 
 //**************Semaphores**************//
-bool isModeSetPos = false; // Position configuration
+bool isModeSetPos = false;      // Position configuration
 bool isModeSetVel = false;		// Velosity configuration
 bool isModeSetAcc = false;		// Acceleration configuration
 bool isModeSetDec = false;		// Deceleration configuration
@@ -67,6 +83,13 @@ void moveMotors(Stepper &M1, Stepper &M2, Stepper &M3, Stepper &M4, Stepper &M5,
 {
 	MQTimer.reset();
 	MQTimer.start();
+    
+    A1 = saturation(A1, 160, 560);
+    A2 = saturation(A2, 155, 475);
+    A3 = saturation(A3, 160, 560);
+    A4 = saturation(A4, 0, 180);
+    A5 = saturation(A5, 0, 180);
+
 	M1.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A1 - SVP_1_3_start)));
 	M2.goesTo(static_cast<int>(K_SVP * (A2 - SVP_2_start)));
 	M3.goesTo(static_cast<int>(K_SVP * (K_Q_Virtual * A3 - SVP_1_3_start)));
@@ -111,7 +134,7 @@ void basicInit()
 	MQ3.setDeceleration(7000);
 	MQ4.setDeceleration(1500);
 	MQ5.setDeceleration(1500);
-
+    // rec 8000
 	MQ1.setPositionZero();
 	MQ2.setPositionZero();
 	MQ3.setPositionZero();
