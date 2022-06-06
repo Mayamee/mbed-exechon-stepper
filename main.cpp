@@ -251,15 +251,6 @@ int main()
 			}
 			//************************CONFIGMODE************************//
 			//************************COMMANDS************************//
-			// if(data.find("/get_state") != string::npos)
-			// {
-			//     pc.printf("%s", (to_string(static_cast<int>(((MQ1.getPosition() / K_Q_Virtual) + SVP_1_3_start) / K_SVP)) + ' ').c_str());
-			//     pc.printf("%s", (to_string(static_cast<int>((MQ2.getPosition() + SVP_2_start) / K_SVP)) + ' ').c_str());
-			//     pc.printf("%s", (to_string(static_cast<int>(((MQ3.getPosition() / K_Q_Virtual) + SVP_1_3_start) / K_SVP)) + ' ').c_str());
-			//     pc.printf("%s", (to_string(static_cast<int>(MQ4.getPosition() / K_Q4)) + ' ').c_str());
-			//     pc.printf("%s", (to_string(static_cast<int>(-MQ5.getPosition())) + '\n').c_str());
-			//     continue;
-			// }
             if(data.find("/toggle_power") != string::npos)
             {
                 EnablePIN = !EnablePIN;
