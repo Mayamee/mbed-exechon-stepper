@@ -191,11 +191,11 @@ int main()
 					pc.printf("Not enough data\n");
 					continue;
 				};
-				MQ1.setSpeed(stof(vel_arr[0]));
-				MQ2.setSpeed(stof(vel_arr[1]));
-				MQ3.setSpeed(stof(vel_arr[2]));
-				MQ4.setSpeed(stof(vel_arr[3]));
-				MQ5.setSpeed(stof(vel_arr[4]));
+				MQ1.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
+				MQ2.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
+				MQ3.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
+				MQ4.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
+				MQ5.setSpeed(saturation(stof(vel_arr[0]), 0, 1200));
 				pc.printf("velocity set\n");
 				isModeSetVel = false;
 				continue;
