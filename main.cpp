@@ -123,13 +123,13 @@ void basicInit()
 	MQ1.setSpeed(900);
 	MQ2.setSpeed(900);
 	MQ3.setSpeed(900);
-	MQ4.setSpeed(1500);
-	MQ5.setSpeed(1500);
+	MQ4.setSpeed(50);
+	MQ5.setSpeed(50);
 	// def 1200
 	MQ1.setAcceleration(300);
 	MQ2.setAcceleration(300);
 	MQ3.setAcceleration(300);
-	MQ4.setAcceleration(1200);
+	MQ4.setAcceleration(300);
 	MQ5.setAcceleration(1200);
 	// def 4000
 	MQ1.setDeceleration(8000);
@@ -182,7 +182,7 @@ int main()
 				q3 = stof(q_arr[2]);
 				q4 = stof(q_arr[3]);
                 // half step
-				q5 = 2 * stof(q_arr[4]);
+				q5 = 1.5 * stof(q_arr[4]);
                 // half step
 				pc.printf("position set\n");
 				isModeSetPos = false;
