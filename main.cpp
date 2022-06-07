@@ -281,10 +281,16 @@ int main()
 			}
 			//************************CONFIGMODE************************//
 			//************************COMMANDS************************//
-            if(data.find("/toggle_power") != string::npos)
+            if(data.find("/power_on") != string::npos)
             {
-                EnablePIN = !EnablePIN;
-                (EnablePIN) ? pc.printf("Power off\n") : pc.printf("Power on\n");
+                EnablePIN = 0;
+                pc.printf("power on\n");
+                continue;
+            }
+            if(data.find("/power_off") != string::npos)
+            {
+                EnablePIN = 1;
+                pc.printf("power off\n");
                 continue;
             }
 			if (data.find("/move") != string::npos)
