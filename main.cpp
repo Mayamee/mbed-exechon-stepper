@@ -182,7 +182,7 @@ int main()
 				q3 = stof(q_arr[2]);
 				q4 = stof(q_arr[3]);
                 // half step
-				q5 = 1.5 * stof(q_arr[4]);
+				q5 = 2 * stof(q_arr[4]);
                 // half step
 				pc.printf("position set\n");
 				isModeSetPos = false;
@@ -284,7 +284,7 @@ int main()
             if(data.find("/toggle_power") != string::npos)
             {
                 EnablePIN = !EnablePIN;
-                (EnablePIN) ? pc.printf("power off\n") : pc.printf("power on\n");
+                (EnablePIN) ? pc.printf("off\n") : pc.printf("on\n");
                 continue;
             }
             if(data.find("/power_on") != string::npos)
